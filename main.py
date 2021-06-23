@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -36,3 +36,36 @@ class User(db.Model):
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, User=User, Role=Role)
+
+@app.post('/register')
+def register():
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+    full_name = request.json.get('fullName', None)
+    role_name = request.json.get('role', None)
+    
+    if not all([email, password, full_name, role_name]):
+        response = {
+            "message": "Field Email, Password, FullName, Role is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+    
+    role = Role.query.filter_by(name=role_name).first()
+    print(role_name)
+    print(role)
+    user = User(email=email, full_name=full_name, role=role)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+    response = {
+        "data": {
+            "email": user.email,
+            "fullName": user.full_name,
+            "id": user.id,
+            "role": user.role.name
+        },
+        "message": "Sucessfully Register!",
+        "status": "success"
+    }
+    return jsonify(response), 200
