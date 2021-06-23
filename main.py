@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -87,5 +87,30 @@ def signin():
         "code": 200,
         "expire": "2021-06-17T16:53:35+07:00",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjM5MjM2MTUsImZ1bGxOYW1lIjoiU2FobGFuIEFkbWluIFhhcGllbnMiLCJpZCI6IlNhaGxhbi5OYXN1dGlvbkB4YXBpZW5zLmlkIiwib3JpZ19pYXQiOjE2MjM5MjI3MTUsInJvbGUiOiJhZG1pbiJ9.qv-npo3SnlNx32D-0o7ryLuvTEH0pGMYEOeB4sFrfTE"
+    }
+    return jsonify(response), 200
+
+@app.get('/movie_reviews/user')
+def get_user():
+    email = request.args.get('email', None)
+    user = User.query.filter_by(email=email).first()
+
+    if user is None:
+        response = {
+            "errors": "record not found",
+            "message": "User not found!",
+            "status": "not found"
+        }
+        return jsonify(response), 404
+    
+    response = {
+        "data": {
+            "id": user.id,
+            "email": user.email,
+            "fullName": user.full_name,
+            "role": user.role.name
+        },
+        "message": "Sucessfully Get Data!",
+        "status": "success"
     }
     return jsonify(response), 200
