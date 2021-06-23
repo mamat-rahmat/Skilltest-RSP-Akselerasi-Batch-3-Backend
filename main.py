@@ -69,3 +69,23 @@ def register():
         "status": "success"
     }
     return jsonify(response), 200
+
+@app.post('/signin')
+def signin():
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+    user = User.query.filter_by(email=email).first()
+
+    if (user is None) or (password is None) or not(user.check_password(password)):
+        response = {
+            "code": 401,
+            "message": "incorrect Username or Password"
+        }
+        return jsonify(response), 401
+
+    response = {
+        "code": 200,
+        "expire": "2021-06-17T16:53:35+07:00",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjM5MjM2MTUsImZ1bGxOYW1lIjoiU2FobGFuIEFkbWluIFhhcGllbnMiLCJpZCI6IlNhaGxhbi5OYXN1dGlvbkB4YXBpZW5zLmlkIiwib3JpZ19pYXQiOjE2MjM5MjI3MTUsInJvbGUiOiJhZG1pbiJ9.qv-npo3SnlNx32D-0o7ryLuvTEH0pGMYEOeB4sFrfTE"
+    }
+    return jsonify(response), 200
