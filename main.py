@@ -114,3 +114,39 @@ def get_user():
         "status": "success"
     }
     return jsonify(response), 200
+
+@app.put('/movie_reviews/user')
+def update_user():
+    email = request.args.get('email', None)
+    user = User.query.filter_by(email=email).first()
+
+    if user is None:
+        response = {
+            "errors": "record not found",
+            "message": "User not found!",
+            "status": "not found"
+        }
+        return jsonify(response), 404
+
+    full_name = request.json.get('fullName', None)
+    if full_name:
+        user.full_name = full_name
+
+    password = request.json.get('password', None)
+    if password:
+        user.set_password(password)
+
+    db.session.add(user)
+    db.session.commit()
+
+    response = {
+        "data": {
+            "id": user.id,
+            "email": user.email,
+            "fullName": user.full_name,
+            "role": user.role.name
+        },
+        "message": "Sucessfully Get Data!",
+        "status": "success"
+    }
+    return jsonify(response), 200
