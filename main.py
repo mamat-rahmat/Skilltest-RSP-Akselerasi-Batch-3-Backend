@@ -157,3 +157,31 @@ def update_user():
         "status": "success"
     }
     return jsonify(response), 200
+
+@app.post('/movie_reviews/genre')
+def add_genre():
+    name = request.json.get('name', None)
+
+    if not name:
+        response = {
+            "message": "Field name is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+    
+    genre = Genre(name=name)
+    db.session.add(genre)
+    db.session.commit()
+    response = {
+        "data": {
+            "name": genre.name,
+            "id": genre.id,
+            "createdAt": genre.created_at,
+            "updatedAt": genre.updated_at,
+            "deletedAt": genre.deleted_at
+        },
+        "message": "Sucessfully Register!",
+        "status": "success"
+    }
+
+    return jsonify(response), 200
