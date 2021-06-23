@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, json, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,10 +33,16 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+class Genre(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    deleted_at = db.Column(db.DateTime)
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Role=Role)
+    return dict(db=db, User=User, Role=Role, Genre=Genre)
 
 @app.post('/register')
 def register():
