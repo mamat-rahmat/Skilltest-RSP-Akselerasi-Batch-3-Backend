@@ -185,3 +185,13 @@ def add_genre():
     }
 
     return jsonify(response), 200
+
+@app.get('/movie_reviews/genre')
+def list_genre():
+    genres = Genre.query.all()
+    response = {
+        "data": [{"id": genre.id, "name": genre.name} for genre in genres],
+        "message": "Successfully Get Genre List",
+        "status": "success"
+    }
+    return jsonify(response), 200
