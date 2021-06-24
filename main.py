@@ -33,6 +33,11 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+movie_genre = db.Table('movie_genre',
+    db.Column('movie_id', db.Integer, db.ForeignKey('movie.id'), primary_key=True),
+    db.Column('genre_id', db.Integer, db.ForeignKey('genre.id'), primary_key=True)
+)
+
 class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
@@ -48,6 +53,7 @@ class Movie(db.Model):
     title = db.Column(db.String(64))
     year =  db.Column(db.Integer)
     ratings =  db.Column(db.Integer)
+    genres = db.relationship('Genre', secondary=movie_genre, lazy='subquery', backref=db.backref('movies', lazy=True))
 
     def __repr__(self):
         return '<Movie %r>' % self.title
@@ -243,7 +249,19 @@ def add_movie():
 def list_movie():
     movies = Movie.query.all()
     response = {
-        "data": [{"id": movie.id, "title": movie.title, "year": movie.year, "ratings": movie.ratings, "genres": []} for movie in movies],
+        "data": [
+            {"id": movie.id,
+            "title": movie.title,
+            "year": movie.year,
+            "ratings": movie.ratings,
+            "genres": [
+                {"id": genre.id,
+                "name": genre.name,
+                "createdAt": genre.created_at,
+                "updatedAt": genre.updated_at,
+                "deletedAt": genre.deleted_at}
+                for genre in movie.genres]}
+            for movie in movies],
         "message": "Successfully Get Movie List",
         "status": "success"
     }
