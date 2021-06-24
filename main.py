@@ -39,7 +39,7 @@ class Genre(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime)
-    
+
     def __repr__(self):
         return '<Genre %r>' % self.name
 
@@ -47,7 +47,7 @@ class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64))
     year =  db.Column(db.Integer)
-    rating =  db.Column(db.Integer)
+    ratings =  db.Column(db.Integer)
 
     def __repr__(self):
         return '<Movie %r>' % self.title
@@ -206,4 +206,34 @@ def list_genre():
         "message": "Successfully Get Genre List",
         "status": "success"
     }
+    return jsonify(response), 200
+
+@app.post('/movie_reviews/movies')
+def add_movie():
+    title = request.json.get('title', None)
+    year = request.json.get('year', None)
+    ratings = request.json.get('ratings', None)
+    
+    if not all([title, year, ratings]):
+        response = {
+            "message": "Field name is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+    
+    movie = Movie(title=title, year=year, ratings=ratings)
+    db.session.add(movie)
+    db.session.commit()
+
+    response = {
+        "data": {
+            "id": movie.id,
+            "title": movie.title,
+            "year": movie.year,
+            "ratings": movie.ratings,
+        },
+        "message": "Sucessfully Created Data!",
+        "status": "success"
+    }
+
     return jsonify(response), 200
