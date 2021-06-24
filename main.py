@@ -237,3 +237,14 @@ def add_movie():
     }
 
     return jsonify(response), 200
+
+
+@app.get('/movie_reviews/movies')
+def list_movie():
+    movies = Movie.query.all()
+    response = {
+        "data": [{"id": movie.id, "title": movie.title, "year": movie.year, "ratings": movie.ratings, "genres": []} for movie in movies],
+        "message": "Successfully Get Movie List",
+        "status": "success"
+    }
+    return jsonify(response), 200
