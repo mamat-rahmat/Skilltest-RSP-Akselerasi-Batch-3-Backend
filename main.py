@@ -39,10 +39,22 @@ class Genre(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return '<Genre %r>' % self.name
+
+class Movie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64))
+    year =  db.Column(db.Integer)
+    rating =  db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<Movie %r>' % self.title
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Role=Role, Genre=Genre)
+    return dict(db=db, User=User, Role=Role, Genre=Genre, Movie=Movie)
 
 @app.post('/register')
 def register():
