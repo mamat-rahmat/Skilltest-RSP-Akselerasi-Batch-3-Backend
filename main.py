@@ -308,3 +308,41 @@ def add_genre_movie():
 
     return jsonify(response), 200
 
+@app.post('/movie_reviews/movies/review')
+def add_review():
+    user_id = request.json.get('user_id', None)
+    movie_id = request.json.get('movie_id', None)
+    review = request.json.get('review', None)
+    rate = request.json.get('rate', None)
+
+    user = User.query.filter_by(id=user_id).first()
+    movie = Movie.query.filter_by(id=movie_id).first()
+
+    print(user, movie, review, rate)
+    if not all([user, movie, review, rate]):
+        response = {
+            "message": "Field name is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+
+    review = Review(user_id=user.id, movie_id=movie.id, review=review, rate=rate)
+    db.session.add(review)
+    db.session.commit()
+
+    response = {
+        "data": {
+            "id": review.id,
+            "review": review.review,
+            "rate": review.rate,
+            "users_id": user.id,
+            "movies_id": movie.id,
+            "CreatedAt": review.created_at,
+            "UpdatedAt": review.updated_at,
+            "DeletedAt": review.deleted_at,
+        },
+        "message": "Sucessfully Add Reviews for this Movie!",
+        "status": "success"
+    }
+
+    return jsonify(response), 200
