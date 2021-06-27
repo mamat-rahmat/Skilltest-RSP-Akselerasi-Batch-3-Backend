@@ -244,7 +244,6 @@ def add_movie():
 
     return jsonify(response), 200
 
-
 @app.get('/movie_reviews/movies')
 def list_movie():
     movies = Movie.query.all()
@@ -265,4 +264,36 @@ def list_movie():
         "message": "Successfully Get Movie List",
         "status": "success"
     }
+    return jsonify(response), 200
+
+@app.post('/movie_reviews/movies/genre')
+def add_genre_movie():
+    movies_id = request.json.get('moviesID', None)
+    genre_id = request.json.get('genreID', None)
+    movie = Movie.query.filter_by(id=movies_id).first()
+    genre = Genre.query.filter_by(id=genre_id).first()
+
+    if not all([movie, genre]):
+        response = {
+            "message": "Field name is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+
+    movie.genres.append(genre)
+    db.session.add(movie)
+    db.session.commit()
+
+    response = {
+            "data": {
+                "movie_id": movie.id,
+                "movie": movie.title,
+                "genre_id": genre.id,
+                "genre": genre.name,
+                "id": None,
+            },
+        "message": "Sucessfully Added Data!",
+        "status": "success"
+    }
+
     return jsonify(response), 200
