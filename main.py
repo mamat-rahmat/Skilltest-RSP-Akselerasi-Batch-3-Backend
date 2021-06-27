@@ -23,6 +23,7 @@ class User(db.Model):
     password = db.Column(db.String(64))
     full_name = db.Column(db.String(64))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    reviews = db.relationship('Review', backref='user')
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -54,6 +55,7 @@ class Movie(db.Model):
     year =  db.Column(db.Integer)
     ratings =  db.Column(db.Integer)
     genres = db.relationship('Genre', secondary=movie_genre, lazy='subquery', backref=db.backref('movies', lazy=True))
+    reviews = db.relationship('Review', backref='movie')
 
     def __repr__(self):
         return '<Movie %r>' % self.title
@@ -67,6 +69,9 @@ class Review(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deleted_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return '<Movie %r>' % self.review
 
 @app.shell_context_processor
 def make_shell_context():
@@ -318,7 +323,6 @@ def add_review():
     user = User.query.filter_by(id=user_id).first()
     movie = Movie.query.filter_by(id=movie_id).first()
 
-    print(user, movie, review, rate)
     if not all([user, movie, review, rate]):
         response = {
             "message": "Field name is required!",
@@ -342,6 +346,49 @@ def add_review():
             "DeletedAt": review.deleted_at,
         },
         "message": "Sucessfully Add Reviews for this Movie!",
+        "status": "success"
+    }
+
+    return jsonify(response), 200
+
+@app.get('/movie_reviews/movies/review')
+def get_review_by_movie():
+    movie_id = request.args.get('movie_id', None)
+    movie = Movie.query.filter_by(id=movie_id).first()
+
+    if not movie:
+        response = {
+            "message": "Field name is required!",
+            "status": "bad request"
+        }
+        return jsonify(response), 400
+
+    reviews = movie.reviews
+
+    response = {
+        "data": [
+            {
+                "id": review.id,
+                "review": review.review,
+                "rate": review.rate,
+                "users_id": review.user.id,
+                "users": {
+                    "email": review.user.email,
+                    "fullName": review.user.full_name,
+                    "role": review.user.role.name,
+                },
+                "movies_id": movie.id,
+                "movies": {
+                    "title": movie.title,
+                    "year": movie.year,
+                    "ratings": movie.ratings,
+                },
+                "CreatedAt": review.created_at,
+                "UpdatedAt": review.updated_at,
+                "DeletedAt": review.deleted_at                
+            }
+            for review in reviews],
+        "message": "Sucessfully Get Review List!",
         "status": "success"
     }
 
