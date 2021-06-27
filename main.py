@@ -58,9 +58,19 @@ class Movie(db.Model):
     def __repr__(self):
         return '<Movie %r>' % self.title
 
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'))
+    review = db.Column(db.Text)
+    rate = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    deleted_at = db.Column(db.DateTime)
+
 @app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, User=User, Role=Role, Genre=Genre, Movie=Movie)
+    return dict(db=db, User=User, Role=Role, Genre=Genre, Movie=Movie, Review=Review)
 
 @app.post('/register')
 def register():
@@ -297,3 +307,4 @@ def add_genre_movie():
     }
 
     return jsonify(response), 200
+
